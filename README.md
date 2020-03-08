@@ -9,6 +9,8 @@ Download repository
 
 Enter repository
 
+Run Cytoscape
+
 Run: python3 app.py
 
 
