@@ -1,0 +1,232 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}This is an example page{% endblock %}
+
+{% block content %}
+{{ super() }}
+
+<div class="container">
+  <div class="container">
+    <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+
+        <a class="navbar-brand" href="#">
+          <!--<img alt="SciKGraph" class="navbar-brand" src="{{url_for('.static', filename='logo.png')}}"> -->
+          <img alt="SciKGraph" src="...">
+        </a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li><a href="{{ url_for('create') }}">Create<span class="sr-only">(current)</span></a></li>
+          <li class="active"><a href="{{ url_for('analyze') }}">Analyze</a></li>
+          <li><a href="{{ url_for('evolution') }}">Track Evolution</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#">About</a></li>
+
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
+
+  <div class="row">
+
+
+    <div class="col-md-4 order-md-2 mb-4">
+      <h3 class="mb-3">Analysis:</h3>
+
+      <form class="needs-validation" name="reduceClustersForm" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="exampleFormControlFile1">Reduce Clusters:</label>
+          <div class="input-group">
+            <span class="input-group-addon" id="sizing-addon1"># Clusters:</span>
+            <input type="number" name="reduceClustersInput" class="form-control" min="1" max= {{ nClusters }} value= {{ nClusters }} required>
+            <div class="input-group-btn">
+              <button class="btn btn-primary" type="submit">Reduce</button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <form class="needs-validation" name="clusterRelationForm" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <div class="input-group">
+            <span class="input-group-addon" id="sizing-addon1">Cluster Relation Graph:</span>
+            <div class="input-group-btn">
+              <button class="btn btn-primary btn-block" name="clusterRelationButton" type="submit">Generate</button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <form class="needs-validation" name="graphModularityForm" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="exampleFormControlFile1">Graph Modularity:</label>
+          <div class="input-group">
+            <span class="input-group-addon" id="sizing-addon1">Modularity:</span>
+            <span class="input-group-addon" id="sizing-addon1"> {{ modularit }} </span>
+            <div class="input-group-btn">
+              <button class="btn btn-primary btn-block" name="graphModularityButton" type="submit">Calculate</button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <form class="needs-validation" name="clusterModularityForm" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="exampleFormControlFile1">Cluster Modularity:</label>
+          <div class="input-group">
+            <span class="input-group-addon" id="sizing-addon1">Cluster #:</span>
+            <input type="number" class="form-control" name="clusterModularityInput" value= {{ nclusterModularity }} min="0" required>
+            <span class="input-group-addon" id="sizing-addon1"> {{ singleModularity }} </span>
+            <div class="input-group-btn">
+              <button class="btn btn-primary" type="submit">Calculate</button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <form class="needs-validation" name="graphKeysForm" method="POST" enctype="multipart/form-data">
+
+        <div class="form-group table-div">
+          <label for="exampleFormControlFile1">Graph Key-concepts & Keyphrases:</label>
+
+            <div class="input-group-btn">
+              <button class="btn btn-primary" name="graphKeyConceptsButton" type="submit">Key-concepts</button>
+              <button class="btn btn-primary" name="graphKeyphrasesButton" type="submit">Keyphrases</button>
+            </div>
+
+          <table class="table table-condensed" name="graphKeysTable">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Key-concept</th>
+                <th scope="col">Centrality</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              {% for i in range(nCKeys) %}
+                <tr>
+                  <th scope="row">{{ i }}</th>
+                  <td>{{ gKeys[i] }}</td>
+                  <td>{{ gCentralities[i] }}</td>
+                </tr>
+              {% endfor %}
+
+            </tbody>
+          </table>
+        </div>
+      </form>
+
+      <div class="form-group">
+        &nbsp;
+      </div>
+      <div class="form-group">
+        &nbsp;
+      </div>
+      <form class="needs-validation" name="clusterKeysForm" method="POST" enctype="multipart/form-data">
+
+        <div class="form-group table-div">
+            <label for="exampleFormControlFile1">Clusters Key-concepts & Keyphrases:</label>
+            <div class="input-group">
+              <span class="input-group-addon" id="sizing-addon1"># Cluster:</span>
+              <input type="number" class="form-control" name="clusterKeysInputs" min="0" value = {{ nClustKeys }} required>
+              <div class="input-group-btn">
+                <button class="btn btn-primary" name="clusterKeyConceptsButton" type="submit">Key-concepts</button>
+                <button class="btn btn-primary" name="clusterKeyphrasesButton" type="submit">Keyphrases</button>
+              </div>
+            </div>
+
+          <table class="table table-condensed" name="clusterKeysTable">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Key-concept</th>
+                <th scope="col">Centrality</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              {% for i in range(nCKeys) %}
+                <tr>
+                  <th scope="row">{{ i }}</th>
+                  <td>{{ cKeys[i] }}</td>
+                  <td>{{ cCentralities[i] }}</td>
+                </tr>
+              {% endfor %}
+
+            </tbody>
+          </table>
+        </div>
+      </form>
+
+      <div class="form-group">
+        &nbsp;
+      </div><div class="form-group">
+        &nbsp;
+      </div><div class="form-group">
+        &nbsp;
+      </div>
+
+
+    </div>
+
+
+
+    <div class="col-md-8 order-md-1">
+      <div id="cy"></div>
+      <div class="form-group">
+        <span class="label label-default">Documents: {{ documents }}</span>
+        <span class="label label-default">Language: {{ language }}</span>
+        <span class="label label-default">Co-occurrence: {{ cooccurrence }}</span>
+      </div>
+      <div class="form-group">
+        <span class="label label-default">Total Concepts: {{ total_concepts }}</span>
+        <span class="label label-default">Total Edges: {{ total_edges }}</span>
+      </div>
+      <div class="form-group">
+        <span class="label label-default">Deleted Concepts: {{ deleted_concepts }}</span>
+        <span class="label label-default">Deleted Edges: {{ deleted_edges }}</span>
+        <span class="label label-default">Deleted Isolated Concepts: {{ deleted_isolated_concepts }}</span>
+      </div>
+      <form class="needs-validation" method="POST" novalidate>
+        <div class="btn-group" role="group" aria-label="...">
+          <div class="form-group" name="openSciKGraph">
+            <label for="exampleFormControlFile1">Choose SciKGraph file:</label>
+            <input type="file" accept=".txt" name="openSciKGraphInput" class="form-control-file" id="documentPathsInput">
+            <button type="submit" class="btn btn-default" name="openGraphButton">Open SciKGraph</button>
+          </div>
+          <button type="submit" class="btn btn-default" name="saveGraphButton">Save SciKGraph</button>
+        </div>
+      </form>
+    </div>
+
+
+
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='main.css')}}">
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('.static', filename='myscripts.js')}}"></script>
+<script src="{{url_for('.static', filename='networks.js')}}"></script>
+<script src="{{url_for('.static', filename='styles.js')}}"></script>
+<script src="{{url_for('.static', filename='custom.js')}}"></script>
+<script src="{{url_for('.static', filename='main.js')}}"></script>
+<script src="{{url_for('.static', filename='vendor.js')}}"></script>
+<script src="{{url_for('.static', filename='1d327552.scripts.js')}}"></script>
+<script src="{{url_for('.static', filename='3e4be17b.app.js')}}"></script>
+<script src="{{url_for('.static', filename='65d77273.vendor.js')}}"></script>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}This is an example page{% endblock %}
+
+{% block content %}
+{{ super() }}
+<div class="container">
+  <div class="container">
+    <div class="container">
+      <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+
+          <a class="navbar-brand" href="#">
+            <!--<img alt="SciKGraph" class="navbar-brand" src="{{url_for('.static', filename='logo.png')}}"> -->
+            <img alt="SciKGraph" src="...">
+          </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="{{ url_for('create') }}">Create<span class="sr-only">(current)</span></a></li>
+            <li><a href="{{ url_for('analyze') }}">Analyze</a></li>
+            <li class="active"><a href="{{ url_for('evolution') }}">Track Evolution</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">About</a></li>
+
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+  <div class="row">
+
+
+    <div class="col-md-4 order-md-2 mb-4">
+      <form class="needs-validation" name="loadGraphsForm" method="POST" enctype="multipart/form-data">
+        <h3 class="mb-3">Open Graphs:</h3>
+        <div class="form-group">
+          <label for="exampleFormControlFile1">Choose Graph 1</label>
+          <input type="file" name="graph1Input" accept=".sckg" class="form-control-file" id="graph1Input">
+        </div>
+
+        <div class="form-group">
+          <label for="exampleFormControlFile1">Choose Graph 2</label>
+          <input type="file" name="graph2Input" accept=".sckg" class="form-control-file" id="graph2Input">
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" name="loadClusters" id="loadClusters">Load Clusters</button>
+      </form>
+
+      <div class="col-md-4 order-md-2 mb-4">
+        <label for="exampleFormControlFile1" name="coversLoadedLabel" id="coversLoadedLabel"> {{ coversLoaded }}</label>
+      </div>
+
+      <div class="form-group">
+        &nbsp;
+      </div>
+
+
+      <h3 class="mb-3">Comparison:</h3>
+      <form class="needs-validation" name="coversSimilarityForm" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="exampleFormControlFile1">Covers Similarity:</label>
+          <div class="input-group">
+            <span class="input-group-addon" id="sizing-addon1">Similarity:</span>
+            <span class="input-group-addon" name="coverSimilarityLabel" id="sizing-addon1"> {{ coversSimilarity }} </span>
+            <div class="input-group-btn">
+              <button class="btn btn-primary btn-block" name="coverSimilarityButton" type="submit">Calculate</button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <form class="needs-validation" name="clustersSimilarityForm" method="POST" enctype="multipart/form-data">
+        <div class="form-group table-div">
+          <label for="exampleFormControlFile1">Clusters Similarity:</label>
+
+          <div class="input-group">
+            <span class="input-group-addon" id="sizing-addon1">Min Cluster Size:</span>
+            <input type="number" class="form-control" name="minClusterSizeInput" value= {{ minClusterThreshold }} min="1" required>
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon" id="sizing-addon1">Similarity Threshold:</span>
+            <input type="number" name = "similarityThresholdInput" class="form-control" value= {{ similarityThreshold }} min="0" step="0.01" required>
+          </div>
+          <div class="input-group-btn">
+            <button class="btn btn-primary btn-block" name="clusterSimilarityButton" type="submit">Calculate</button>
+          </div>
+
+          <table class="table table-condensed" name = "clustersSimilarityTable">
+            <thead>
+              <tr>
+                <th scope="col">Cover 1</th>
+                <th scope="col">Cover 2</th>
+                <th scope="col">Similarity</th>
+              </tr>
+            </thead>
+            <tbody>
+
+
+              {% for i in similarClusters %}
+                <tr>
+                  <td>{{ i[0] }}</td>
+                  <td>{{ i[1] }}</td>
+                  <td>{{ i[2] }}</td>
+                </tr>
+              {% endfor %}
+
+
+            </tbody>
+          </table>
+        </div>
+      </form>
+
+
+      <form class="needs-validation" name="overlappingClustersForm" method="POST" enctype="multipart/form-data">
+
+        <div class="form-group table-div">
+          <label for="exampleFormControlFile1">Ovalapping Clusters:</label>
+
+          <div class="input-group">
+            <span class="input-group-addon" id="sizing-addon1"># Cluster1:</span>
+            <input type="number" name="cluster1OverlapInput" class="form-control" min="0" value = {{ cluster1 }} required>
+            <span class="input-group-addon" id="sizing-addon1"># Cluster2:</span>
+            <input type="number" name="cluster2OverlapInput" class="form-control" min="0" value = {{ cluster2 }} required>
+          </div>
+          <div class="input-group-btn">
+            <button class="btn btn-primary btn-block" name="clustersOverlappingButton" type="submit">Visualize</button>
+          </div>
+
+          <table class="table table-condensed" name="clustersOverlapTable">
+            <thead>
+              <tr>
+                <th scope="col">1 only</th>
+                <th scope="col">2 only</th>
+                <th scope="col">Both</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              {% for i in overelappingClusters %}
+                <tr>
+                  <td>{{ i[0] }}</td>
+                  <td>{{ i[1] }}</td>
+                  <td>{{ i[2] }}</td>
+                </tr>
+              {% endfor %}
+
+            </tbody>
+          </table>
+        </div>
+      </form>
+
+
+
+      <div class="form-group">
+        &nbsp;
+      </div>
+      <div class="form-group">
+        &nbsp;
+      </div>
+
+
+    </div>
+
+    <div class="col-md-8 order-md-1">
+      <div id="cy"></div>
+      <div class="form-group">
+        <span class="label label-default">Documents: {{ documents }}</span>
+        <span class="label label-default">Language: {{ language }}</span>
+        <span class="label label-default">Co-occurrence: {{ cooccurrence }}</span>
+      </div>
+      <div class="form-group">
+        <span class="label label-default">Total Concepts: {{ total_concepts }}</span>
+        <span class="label label-default">Total Edges: {{ total_edges }}</span>
+      </div>
+      <div class="form-group">
+        <span class="label label-default">Deleted Concepts: {{ deleted_concepts }}</span>
+        <span class="label label-default">Deleted Edges: {{ deleted_edges }}</span>
+        <span class="label label-default">Deleted Isolated Concepts: {{ deleted_isolated_concepts }}</span>
+      </div>
+      <form class="needs-validation" method="POST" novalidate>
+        <div class="btn-group" role="group" aria-label="...">
+          <div class="form-group" name="openSciKGraph">
+            <label for="exampleFormControlFile1">Choose SciKGraph file:</label>
+            <input type="file" accept=".txt" name="openSciKGraphInput" class="form-control-file" id="documentPathsInput">
+            <button type="submit" class="btn btn-default" name="openGraphButton">Open SciKGraph</button>
+          </div>
+          <button type="submit" class="btn btn-default" name="saveGraphButton">Save SciKGraph</button>
+        </div>
+      </form>
+    </div>
+
+
+
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='main.css')}}">
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('.static', filename='myscripts.js')}}"></script>
+<script src="{{url_for('.static', filename='networks.js')}}"></script>
+<script src="{{url_for('.static', filename='styles.js')}}"></script>
+<script src="{{url_for('.static', filename='custom.js')}}"></script>
+<script src="{{url_for('.static', filename='main.js')}}"></script>
+<script src="{{url_for('.static', filename='vendor.js')}}"></script>
+<script src="{{url_for('.static', filename='1d327552.scripts.js')}}"></script>
+<script src="{{url_for('.static', filename='3e4be17b.app.js')}}"></script>
+<script src="{{url_for('.static', filename='65d77273.vendor.js')}}"></script>
+{% endblock %}

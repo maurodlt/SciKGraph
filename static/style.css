@@ -1,0 +1,21 @@
+tr {
+width: 100%;
+display: inline-table;
+table-layout: fixed;
+}
+
+table{
+ height:0px;              // <-- Select the height of the table
+ padding-bottom: 300px;
+ display: -moz-groupbox;
+}
+tbody{
+  overflow-y: scroll;
+  height: 150px;            //  <-- Select the height of the body
+  width: 100%;
+  position: absolute;
+}
+
+.table-div{
+  height:200px;
+}

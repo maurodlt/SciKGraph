@@ -1,0 +1,205 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}This is an example page{% endblock %}
+
+{% block content %}
+{{ super() }}
+<div class="container">
+  <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+
+      <a class="navbar-brand" href="#">
+        <!--<img alt="SciKGraph" class="navbar-brand" src="{{url_for('.static', filename='logo.png')}}"> -->
+        <img alt="SciKGraph" src="...">
+      </a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="{{ url_for('create') }}">Create<span class="sr-only">(current)</span></a></li>
+        <li><a href="{{ url_for('analyze') }}">Analyze</a></li>
+        <li><a href="{{ url_for('evolution') }}">Track Evolution</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">About</a></li>
+
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+
+  <div class="py-5 text-center">
+  </div>
+
+  <div class="row">
+
+
+    <div class="col-md-4 order-md-2 mb-4">
+      <h3 class="mb-3">Input Data:</h3>
+      <form class="needs-validation" name="inputData" method="POST" enctype="multipart/form-data">
+
+        <div class="form-group" name="inputDataForm">
+          <label for="exampleFormControlFile1">Choose documents</label>
+          <input type="file" accept=".txt" name="documentPathsInput" class="form-control-file" id="documentPathsInput" multiple>
+        </div>
+
+
+        <div class="form-group">
+          <label for="inputPassword">Babelfy Key</label>
+          <input type="password" class="form-control" name="babelfyKeyInput" id="exampleFormControlInput1" required>
+        </div>
+
+        <div class="form-group">
+          <label for="exampleFormControlSelect1">Language</label>
+          <select class="form-control" id="exampleFormControlSelect1" name="languageSelect">
+            <option>EN</option>
+            <option>ES</option>
+            <option>PT</option>
+            <option>DE</option>
+            <option>FR</option>
+          </select>
+        </div>
+
+        <p>
+          <a class="btn btn-link" data-toggle="collapse" href="#collapseDistance" role="button" aria-expanded="false" aria-controls="collapseExample">
+            Advanced
+          </a>
+        </p>
+        <div class="collapse" id="collapseDistance">
+          <div class="card card-body">
+
+            <div class="form-group">
+              <div class="checkbox">
+                <label><input type="checkbox" id="clusterIfFailCheck" name="clusterIfFailCheck">Plot graph if you run out of Babelkeys</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="exampleFormControlFile1">Cooccurrence distance</label>
+              <input type="number" class="form-control" id="exampleFormControlInput1" value="1" min="1" name="distanceInput" required>
+            </div>
+
+          </div>
+        </div>
+
+        <button type="submit" name="constructGraphButton" class="btn btn-primary btn-block">Construct Graph</button>
+
+      </form>
+
+      <div class="form-group">
+        &nbsp;
+      </div>
+
+
+      <h3 class="mb-3">Pre Process Graph:</h3>
+      <form class="needs-validation" method="POST" novalidate>
+
+        <div class="form-group">
+          <label for="exampleFormControlFile1">Vertices Threshold</label>
+          <input type="number" class="form-control" id="verticesThresholdInput" name="verticesThresholdInput" value="1" min="0" required>
+        </div>
+
+        <div class="form-group">
+          <label for="exampleFormControlSelect2">Vertices to delete</label>
+          <select multiple class="form-control" id="verticesThresholdSelect" name="verticesThresholdSelect">
+
+            {% for concept in key_concepts %}
+              <option>{{ concept }}</option>
+            {% endfor %}
+
+
+
+          </select>
+        </div>
+
+        <p>
+          <a class="btn btn-link" data-toggle="collapse" href="#collapseThreshold" role="button" aria-expanded="false" aria-controls="collapseExample">
+            Advanced
+          </a>
+        </p>
+        <div class="collapse" id="collapseThreshold">
+          <div class="card card-body">
+            <div class="form-group">
+              <label for="exampleFormControlFile1">Edges Threshold</label>
+              <input type="number" class="form-control" id="edgesThresholdInput" name="edgesThresholdInput" value="1" min="0" required>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" name="preprocessButton" >Preprocess</button>
+      </form>
+
+      <div class="form-group">
+        &nbsp;
+      </div>
+      <form class="needs-validation" name="clusterForm" method="POST" enctype="multipart/form-data">
+        <button type="submit" class="btn btn-primary btn-block" name="clusterGraphButton" >Cluster Graph</button>
+      </form>
+      <div class="form-group">
+        &nbsp;
+      </div>
+      <div class="form-group">
+        &nbsp;
+      </div>
+
+    </div>
+
+    <div class="col-md-8 order-md-1">
+      <div id="cy"></div>
+      <div class="form-group">
+        <span class="label label-default">Documents: {{ documents }}</span>
+        <span class="label label-default">Language: {{ language }}</span>
+        <span class="label label-default">Co-occurrence: {{ cooccurrence }}</span>
+      </div>
+      <div class="form-group">
+        <span class="label label-default">Total Concepts: {{ total_concepts }}</span>
+        <span class="label label-default">Total Edges: {{ total_edges }}</span>
+      </div>
+      <div class="form-group">
+        <span class="label label-default">Deleted Concepts: {{ deleted_concepts }}</span>
+        <span class="label label-default">Deleted Edges: {{ deleted_edges }}</span>
+        <span class="label label-default">Deleted Isolated Concepts: {{ deleted_isolated_concepts }}</span>
+      </div>
+      <form class="needs-validation" name="openGraphForm" method="POST" enctype="multipart/form-data">
+        <div class="btn-group" role="group" aria-label="...">
+            <label for="exampleFormControlFile">Choose SciKGraph file to open:</label>
+            <input type="file" accept=".sckg" name="openSciKGraphInput" class="form-control-file" id="openSciKGraphInput" onchange="this.form.submit()">
+        </div>
+      </form>
+      <div class="form-group">
+        &nbsp;
+      </div>
+      <form class="needs-validation" name="saveGraphForm" method="POST" enctype="multipart/form-data">
+        <div class="btn-group" role="group" aria-label="...">
+            <button type="submit" class="btn btn-default" name="saveGraphButton">Save SciKGraph</button>
+        </div>
+      </form>
+    </div>
+
+
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='main.css')}}">
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('.static', filename='myscripts.js')}}"></script>
+<script src="{{url_for('.static', filename='networks.js')}}"></script>
+<script src="{{url_for('.static', filename='styles.js')}}"></script>
+<script src="{{url_for('.static', filename='custom.js')}}"></script>
+<script src="{{url_for('.static', filename='main.js')}}"></script>
+<script src="{{url_for('.static', filename='vendor.js')}}"></script>
+<script src="{{url_for('.static', filename='1d327552.scripts.js')}}"></script>
+<script src="{{url_for('.static', filename='3e4be17b.app.js')}}"></script>
+<script src="{{url_for('.static', filename='65d77273.vendor.js')}}"></script>
+{% endblock %}
