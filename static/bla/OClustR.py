@@ -2,7 +2,7 @@ import string
 import networkx as nx
 import re
 from nltk import word_tokenize, pos_tag
-from scikgraph.babelfy import *
+from pybabelfy.babelfy import *
 from nltk.stem import PorterStemmer
 from math import log
 import pickle

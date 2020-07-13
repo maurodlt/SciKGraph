@@ -1,5 +1,5 @@
 {% extends "bootstrap/base.html" %}
-{% block title %}This is an example page{% endblock %}
+{% block title %}SciKGRaph | Analyze{% endblock %}
 
 {% block content %}
 {{ super() }}
@@ -193,14 +193,18 @@
         <span class="label label-default">Deleted Edges: {{ deleted_edges }}</span>
         <span class="label label-default">Deleted Isolated Concepts: {{ deleted_isolated_concepts }}</span>
       </div>
-      <form class="needs-validation" method="POST" novalidate>
+      <form class="needs-validation" name="openGraphForm" method="POST" enctype="multipart/form-data">
         <div class="btn-group" role="group" aria-label="...">
-          <div class="form-group" name="openSciKGraph">
-            <label for="exampleFormControlFile1">Choose SciKGraph file:</label>
-            <input type="file" accept=".txt" name="openSciKGraphInput" class="form-control-file" id="documentPathsInput">
-            <button type="submit" class="btn btn-default" name="openGraphButton">Open SciKGraph</button>
-          </div>
-          <button type="submit" class="btn btn-default" name="saveGraphButton">Save SciKGraph</button>
+            <label for="exampleFormControlFile">Choose SciKGraph file to open:</label>
+            <input type="file" accept=".sckg" name="openSciKGraphInput" class="form-control-file" id="openSciKGraphInput" onchange="this.form.submit()">
+        </div>
+      </form>
+      <div class="form-group">
+        &nbsp;
+      </div>
+      <form class="needs-validation" name="saveGraphForm" method="POST" enctype="multipart/form-data">
+        <div class="btn-group" role="group" aria-label="...">
+            <button type="submit" class="btn btn-default" name="saveGraphButton">Save SciKGraph</button>
         </div>
       </form>
     </div>
@@ -220,13 +224,14 @@
 
 {% block scripts %}
 {{super()}}
+<script src="{{url_for('.static', filename='custom.js')}}"></script>
 <script src="{{url_for('.static', filename='myscripts.js')}}"></script>
 <script src="{{url_for('.static', filename='networks.js')}}"></script>
 <script src="{{url_for('.static', filename='styles.js')}}"></script>
-<script src="{{url_for('.static', filename='custom.js')}}"></script>
 <script src="{{url_for('.static', filename='main.js')}}"></script>
 <script src="{{url_for('.static', filename='vendor.js')}}"></script>
 <script src="{{url_for('.static', filename='1d327552.scripts.js')}}"></script>
 <script src="{{url_for('.static', filename='3e4be17b.app.js')}}"></script>
 <script src="{{url_for('.static', filename='65d77273.vendor.js')}}"></script>
+
 {% endblock %}

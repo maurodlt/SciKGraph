@@ -1,5 +1,5 @@
 {% extends "bootstrap/base.html" %}
-{% block title %}This is an example page{% endblock %}
+{% block title %}SciKGRaph | Create{% endblock %}
 
 {% block content %}
 {{ super() }}
@@ -99,12 +99,12 @@
 
         <div class="form-group">
           <label for="exampleFormControlFile1">Vertices Threshold</label>
-          <input type="number" class="form-control" id="verticesThresholdInput" name="verticesThresholdInput" value="1" min="0" required>
+          <input type="number" class="form-control" id="verticesThresholdInput" name="verticesThresholdInput" value="1" min="0">
         </div>
 
         <div class="form-group">
           <label for="exampleFormControlSelect2">Vertices to delete</label>
-          <select multiple class="form-control" id="verticesThresholdSelect" name="verticesThresholdSelect">
+          <select multiple class="form-control" id="verticesThresholdSelect" name="verticesThresholdSelect" onchange="myFunction()">
 
             {% for concept in key_concepts %}
               <option>{{ concept }}</option>
@@ -193,13 +193,14 @@
 
 {% block scripts %}
 {{super()}}
+<script src="{{url_for('.static', filename='custom.js')}}"></script>
 <script src="{{url_for('.static', filename='myscripts.js')}}"></script>
 <script src="{{url_for('.static', filename='networks.js')}}"></script>
 <script src="{{url_for('.static', filename='styles.js')}}"></script>
-<script src="{{url_for('.static', filename='custom.js')}}"></script>
 <script src="{{url_for('.static', filename='main.js')}}"></script>
 <script src="{{url_for('.static', filename='vendor.js')}}"></script>
 <script src="{{url_for('.static', filename='1d327552.scripts.js')}}"></script>
 <script src="{{url_for('.static', filename='3e4be17b.app.js')}}"></script>
 <script src="{{url_for('.static', filename='65d77273.vendor.js')}}"></script>
+
 {% endblock %}

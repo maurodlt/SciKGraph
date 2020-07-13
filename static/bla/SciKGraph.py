@@ -3,13 +3,13 @@ import networkx as nx
 import re
 import sys
 from nltk import word_tokenize, pos_tag
-from scikgraph.babelfy import *
+from pybabelfy.babelfy import *
 from nltk.stem import PorterStemmer
 from math import log
 import pickle
 import glob
 import os
-import scikgraph.OClustR as OCR
+import OClustR as OCR
 import operator
 #import nltk
 

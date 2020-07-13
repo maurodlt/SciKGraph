@@ -375,108 +375,44 @@ var styles = [ {
       "background-opacity" : 0.19607843137254902,
       "shape" : "roundrectangle",
       "height" : 60.0
-    }
-  }, {
-    "selector" : "node:selected",
-    "css" : {
-      "background-color" : "rgb(255,255,0)"
-    }
-  }, {
-    "selector" : "edge",
-    "css" : {
-      "content" : "",
-      "font-family" : "Dialog.plain",
-      "font-weight" : "normal",
-      "opacity" : 1.0,
-      "width" : 2.0,
-      "color" : "rgb(0,0,0)",
-      "text-opacity" : 1.0,
-      "line-color" : "rgb(132,132,132)",
-      "target-arrow-shape" : "none",
-      "line-style" : "solid",
-      "source-arrow-shape" : "none",
-      "target-arrow-color" : "rgb(0,0,0)",
-      "font-size" : 10,
-      "source-arrow-color" : "rgb(0,0,0)"
-    }
-  }, {
-    "selector" : "edge:selected",
-    "css" : {
-      "line-color" : "rgb(255,0,0)"
-    }
-},{},{}
-,{
-                            "selector" : "node[ peso <= 1]",
-                            "css" : {
-                                "height" : 5.0,
-                                "width" : 5.0
-                            }
-                        }, {
-                            "selector" : "node[ peso >= 10 ]",
-                            "css" : {
-                                "height" : 50.0,
-                                "width" : 50.0
-                            }
-                        }, {
-                            "selector" : "node[peso > 1][peso < 10]",
-                            "css" : {
-                                "height" : "mapData(peso,1,10,5,50)",
-                                "width" : "mapData(peso,1,10,5,50)"
-                            }
-                        },{
-                            "selector" : "edge[ weight >= 1]",
-                            "css" : {
-                                "width" : 10.0
-                            }
-                        }, {
-                            "selector" : "edge[ weight <= 10 ]",
-                            "css" : {
-                                "width" : 1.0
-                            }
-                        }, {
-                            "selector" : "edge[ weight = 0 ]",
-                            "css" : {
-                                "width" : 0.0
-                            }
-                        }, {
-                            "selector" : "edge[weight > 10][weight < 1]",
-                            "css" : {
-                                "width" : "mapData(weight,10,1,1,10)"
-                            }
-                        }, {
-                            "selector" : "node[peso >= 10]",
-                            "css" : {
-                              "background-color" : "rgb(102,37,6)"
-                            }
-                          }, {
-                            "selector" : "node[peso >= 5][peso < 10]",
-                            "css" : {
-                              "background-color" : "mapData(peso,5,10,rgb(254,153,41),rgb(153,52,4))"
-                            }
-                          }, {
-                            "selector" : "node[peso > 1][peso < 5]",
-                            "css" : {
-                              "background-color" : "mapData(peso,1,5,rgb(255,247,188),rgb(254,153,41))"
-                            }
-                          }, {
-                            "selector" : "node[peso <= 1]",
-                            "css" : {
-                              "background-color" : "rgb(255,247,188)"
-                            }
-                          }, {
-                                "selector" : "node[peso >= 10]",
-                                "css" : {
-                                  "font-size" : 12.5
-                                }
-                              }, {
-                                "selector" : "node[peso > 1][peso < 10]",
-                                "css" : {
-                                  "font-size" : "mapData(peso,1,10,10,12.5)"
-                                }
-                              }, {
-                                "selector" : "node[peso <= 1]",
-                                "css" : {
-                                  "font-size" : 10
-                                }
-                              }]
+},{
+                        "selector" : "node[ peso < 1]",
+                        "css" : {
+                            "height" : 10.0,
+                            "width" : 10.0
+                        }
+                    }, {
+                        "selector" : "node[ peso > 1 ]",
+                        "css" : {
+                            "height" : 200.0,
+                            "width" : 200.0
+                        }
+                    }, {
+                        "selector" : "node[peso >= 1][peso <= 1]",
+                        "css" : {
+                            "height" : "mapData(peso,1,1,10,200)",
+                            "width" : "mapData(peso,1,1,10,200)"
+                        }
+                    }, {
+                        "selector" : "node[peso >= 1]",
+                        "css" : {
+                          "background-color" : "rgb(102,37,6)"
+                        }
+                      }, {
+                        "selector" : "node[peso > 1][peso < 1]",
+                        "css" : {
+                          "background-color" : "mapData(peso,1,1,rgb(254,153,41),rgb(153,52,4))"
+                        }
+                      }, {
+                        "selector" : "node[peso > 1][peso < 1]",
+                        "css" : {
+                          "background-color" : "mapData(peso,1,1,rgb(255,247,188),rgb(254,153,41))"
+                        }
+                      }, {
+                        "selector" : "node[peso <= 1]",
+                        "css" : {
+                          "background-color" : "rgb(255,247,188)"
+                        }
+                      }
+    ]
 } ]

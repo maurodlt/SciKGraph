@@ -247,6 +247,9 @@ def compareFullCovers(cover1, cover2, folderNMI, NMI_type='NMI<Max>'):
     answer = p.stdout.decode('ascii').split('\n')
     parsedAnswer = parseAnswer(answer)
 
+    print('\n\ncommand: ', command)
+    print('\n\nanswer: ', answer)
+
 
     if NMI_type == 'NMI<Max>':
         return parsedAnswer[0][1]

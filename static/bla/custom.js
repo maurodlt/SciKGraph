@@ -1,5 +1,5 @@
 $( document ).ready(function(){
-  //document.getElementById("verticesThresholdSelect").options[0].selected = true;
+  document.getElementById("verticesThresholdSelect").options[0].selected = true;
   //document.getElementById("verticesThresholdSelect").selectedIndex = 2;
   //document.getElementById("verticesThresholdSelect").selectedIndex = [2,3,4];
   //document.getElementById("verticesThresholdSelect").options[0].selected = true;

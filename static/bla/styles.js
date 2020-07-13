@@ -408,40 +408,20 @@ var styles = [ {
 ,{
                             "selector" : "node[ peso <= 1]",
                             "css" : {
-                                "height" : 5.0,
-                                "width" : 5.0
+                                "height" : 10.0,
+                                "width" : 10.0
                             }
                         }, {
                             "selector" : "node[ peso >= 10 ]",
                             "css" : {
-                                "height" : 50.0,
-                                "width" : 50.0
+                                "height" : 200.0,
+                                "width" : 200.0
                             }
                         }, {
                             "selector" : "node[peso > 1][peso < 10]",
                             "css" : {
-                                "height" : "mapData(peso,1,10,5,50)",
-                                "width" : "mapData(peso,1,10,5,50)"
-                            }
-                        },{
-                            "selector" : "edge[ weight >= 1]",
-                            "css" : {
-                                "width" : 10.0
-                            }
-                        }, {
-                            "selector" : "edge[ weight <= 10 ]",
-                            "css" : {
-                                "width" : 1.0
-                            }
-                        }, {
-                            "selector" : "edge[ weight = 0 ]",
-                            "css" : {
-                                "width" : 0.0
-                            }
-                        }, {
-                            "selector" : "edge[weight > 10][weight < 1]",
-                            "css" : {
-                                "width" : "mapData(weight,10,1,1,10)"
+                                "height" : "mapData(peso,1,10,10,200)",
+                                "width" : "mapData(peso,1,10,10,200)"
                             }
                         }, {
                             "selector" : "node[peso >= 10]",
@@ -466,17 +446,121 @@ var styles = [ {
                           }, {
                                 "selector" : "node[peso >= 10]",
                                 "css" : {
-                                  "font-size" : 12.5
+                                  "font-size" : 50.0
                                 }
                               }, {
                                 "selector" : "node[peso > 1][peso < 10]",
                                 "css" : {
-                                  "font-size" : "mapData(peso,1,10,10,12.5)"
+                                  "font-size" : "mapData(peso,1,10,10,50.0)"
                                 }
                               }, {
                                 "selector" : "node[peso <= 1]",
                                 "css" : {
                                   "font-size" : 10
                                 }
-                              }]
+                              }, {
+                                            "selector" : "node[ id = '3348' ]",
+                                            "css" : {
+                                                "height" : 81.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 232.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3334' ]",
+                                            "css" : {
+                                                "height" : 154.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 139.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3320' ]",
+                                            "css" : {
+                                                "height" : 146.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 105.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3306' ]",
+                                            "css" : {
+                                                "height" : 108.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 222.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3292' ]",
+                                            "css" : {
+                                                "height" : 259.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 180.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3278' ]",
+                                            "css" : {
+                                                "height" : 144.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 99.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3264' ]",
+                                            "css" : {
+                                                "height" : 93.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 229.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3250' ]",
+                                            "css" : {
+                                                "height" : 97.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 229.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3236' ]",
+                                            "css" : {
+                                                "height" : 74.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 224.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3222' ]",
+                                            "css" : {
+                                                "height" : 55.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 95.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3206' ]",
+                                            "css" : {
+                                                "height" : 206.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 374.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3190' ]",
+                                            "css" : {
+                                                "height" : 176.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 276.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }, {
+                                            "selector" : "node[ id = '3170' ]",
+                                            "css" : {
+                                                "height" : 343.0,
+                                                "shape" :" rectangle ",
+                                                "width" : 363.0,
+                                                "background-opacity" : 0.19607843137254902
+                                            }
+                                        }]
 } ]
