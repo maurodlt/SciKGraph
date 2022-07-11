@@ -146,7 +146,7 @@ def create_app():
 
         else:
             sorted_concepts = []
-            plot_network()
+            ##plot_network()
             return render_template('createSciKGraph.html', key_concepts = sorted_concepts[:200], documents=0, language='EN', cooccurrence=0, total_concepts=0, total_edges=0, deleted_edges= 0, deleted_concepts= 0, deleted_isolated_concepts= 0)
 
             return render_template('createSciKGraph.html')
