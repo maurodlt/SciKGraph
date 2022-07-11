@@ -7,21 +7,28 @@ Install Cytoscape version 3.7.2: https://cytoscape.org/download_old_versions.htm
 
 Register on BabelNet: https://babelnet.org/register
 
-Install ScikGrapp-App: pip3 install scikgraph
+Install ScikGrapp-App: 
 
-Install server: sudo apt install python3-waitress
+```pip3 install scikgraph```
+
+Install server: 
+
+```sudo apt install python3-waitress```
 
 ## To start application:
 
-Open Cytoscape application.
+Open Cytoscape application. (Double click Cytoscape icon or run the following command)
 
-Run: waitress-serve --call 'scikgraph:create_app'
+```sudo /usr/local/src/cytoscape-3.7.2/cytoscape.sh```
+
+Open SciKGraph
+
+```waitress-serve --call 'scikgraph:create_app'```
 
 
 
 # License
-Academic and Personal use and modification is permitted. For commercial use, please contact us. 
-
+MITCC-BY-NC-ND
 
 # Cite us
 https://doi.org/10.1177/0165551520937915
