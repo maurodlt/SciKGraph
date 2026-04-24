@@ -124,7 +124,7 @@ class Babelfy(object):
         
     PARAMETERS = [TEXT,LANG,KEY,ANNTYPE,ANNRES,TH,MATCH,MCS,DENS,CANDS,POSTAG,EXTAIDA]
     
-    API = "https://babelfy.io/v1/"
+    API = "https://api.babelfy.org/v1/"
     DISAMBIGUATE = "disambiguate?"
     
         
