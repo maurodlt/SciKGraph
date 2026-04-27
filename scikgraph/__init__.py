@@ -118,14 +118,23 @@ def create_app():
         return None
 
     def _read_styles_base():
-        path = os.path.join(app.root_path, 'static', 'styles.js')
-        with open(path, 'r') as f:
+        # The runtime-generated `styles.js` is a concatenation of two parts:
+        #   1. A static base template (default Cytoscape node/edge styles) that
+        #      ships with the package as `styles_template.js`.
+        #   2. Dynamic style fragments appended on each render, derived from the
+        #      current graph's min/max/medium peso, edge weights, etc.
+        # We read the template from `styles_template.js` (which is guaranteed
+        # to exist after pip install) and write the composed result to
+        # `styles.js` (which is gitignored and runtime-only).
+        template_path = os.path.join(app.root_path, 'static', 'styles_template.js')
+        out_path = os.path.join(app.root_path, 'static', 'styles.js')
+        with open(template_path, 'r') as f:
             lines = f.readlines()
-        cut = 0
+        cut = len(lines) - 1
         for i, ln in enumerate(lines):
             if STYLES_BASE_MARKER in ln:
                 cut = i
-        return path, lines[:cut + 1]
+        return out_path, lines[:cut + 1]
 
     def _style_node_size(min_peso, max_peso, min_size, max_size):
         return (',{"selector":"node[ peso <= ' + str(min_peso) + ']",'

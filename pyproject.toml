@@ -65,3 +65,11 @@ scikgraph = [
     "static/*.png",
     "static/onmi",
 ]
+
+# networks.js and styles.js are regenerated at runtime by plot_network();
+# they are not source artifacts and should not ship inside the wheel.
+[tool.setuptools.exclude-package-data]
+scikgraph = [
+    "static/networks.js",
+    "static/styles.js",
+]
