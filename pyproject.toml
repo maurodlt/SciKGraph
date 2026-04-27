@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scikgraph"
+version = "2.0.0"
+description = "Web application for building, clustering, and visualizing knowledge graphs from scientific text."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "CC-BY-NC-ND-4.0" }
+authors = [
+    { name = "Mauro Dalle Lucca Tosi" },
+    { name = "Julio Cesar dos Reis" },
+]
+keywords = [
+    "knowledge graph",
+    "natural language processing",
+    "babelfy",
+    "clustering",
+    "scientific literature",
+    "cytoscape",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Flask",
+    "Intended Audience :: Science/Research",
+    "License :: Other/Proprietary License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+]
+dependencies = [
+    "Flask>=3.1",
+    "Flask-Bootstrap>=3.3",
+    "Werkzeug>=3.1",
+    "networkx>=2.8,<3",
+    "scipy>=1.10",
+    "nltk>=3.9",
+    "waitress>=3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/maurodlt/SciKGraph"
+Issues = "https://github.com/maurodlt/SciKGraph/issues"
+
+[project.scripts]
+scikgraph = "scikgraph.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["scikgraph*"]
+exclude = ["scikgraph.saveFiles*", "scikgraph.static.temp*"]
+
+[tool.setuptools.package-data]
+scikgraph = [
+    "templates/*.html",
+    "static/*.js",
+    "static/*.css",
+    "static/*.png",
+    "static/onmi",
+]
