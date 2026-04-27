@@ -1,26 +1,31 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import Flask, render_template, request, send_file, flash
 from flask_bootstrap import Bootstrap
-from werkzeug.utils import secure_filename
 import os
-import SciKGraph as skg
-import pickle
-import OClustR as OCR
 import json
-import Analyses
 import copy
-import subprocess
+import networkx as nx
+from scikgraph import SciKGraph as skg
+from scikgraph import Analyses
 
 
-from py2cytoscape import cyrest
-from py2cytoscape import util as cy
-from py2cytoscape.data.cyrest_client import CyRestClient
-from IPython.display import Image
+def _server_layout_spring(g):
+    pos = nx.spring_layout(g, iterations=50, seed=42)
+    return {str(n): {"x": float(p[0]) * 1000.0, "y": float(p[1]) * 1000.0}
+            for n, p in pos.items()}
 
-cytoscape=cyrest.cyclient()
-cyjs = CyRestClient()
+
+LAYOUTS = {
+    "spring":     {"side": "server", "fn": _server_layout_spring},
+    "cose":       {"side": "browser"},
+    "concentric": {"side": "browser"},
+    "circle":     {"side": "browser"},
+    "grid":       {"side": "browser"},
+}
+DEFAULT_LAYOUT = "spring"
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.config['SECRET_KEY'] = os.urandom(24)
 UPLOAD_FOLDER = '/home/mauro/Documents/flask_app/static/temp/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 Bootstrap(app)
@@ -28,13 +33,99 @@ sKGraph = skg.SciKGraph()
 sKGraph1 = skg.SciKGraph()
 sKGraph2 = skg.SciKGraph()
 
+
+def _nx_to_cyjs_elements(g, clusters=None, positions=None):
+    elements = {"nodes": [], "edges": []}
+    parent_of = {}
+    if clusters:
+        for i, members in enumerate(clusters):
+            pid = 'group' + str(i)
+            elements["nodes"].append({"data": {
+                "id": pid, "SUID": pid, "name": pid,
+                "shared_name": pid, "group_node": True,
+            }})
+            for n in members:
+                parent_of[str(n)] = pid
+    for nid, attrs in g.nodes(data=True):
+        sid = str(nid)
+        data = {"id": sid, "SUID": sid, "name": sid, "shared_name": sid}
+        for k, v in attrs.items():
+            if k == 'dicionario' and isinstance(v, str):
+                data[k] = v.replace('+', ' ')
+            else:
+                data[k] = v
+        if sid in parent_of:
+            data["parent"] = parent_of[sid]
+        element = {"data": data}
+        if positions is not None and sid in positions:
+            element["position"] = positions[sid]
+        elements["nodes"].append(element)
+    for u, v, attrs in g.edges(data=True):
+        edge_data = {"source": str(u), "target": str(v)}
+        edge_data.update(attrs)
+        elements["edges"].append({"data": edge_data})
+    return elements
+
+
+def plot_network(g, clusters=None, layout_name=None):
+    name = layout_name or DEFAULT_LAYOUT
+    spec = LAYOUTS.get(name, LAYOUTS[DEFAULT_LAYOUT])
+    if spec["side"] == "server":
+        positions = spec["fn"](g)
+        browser_layout = "preset"
+    else:
+        positions = None
+        browser_layout = name
+    elements = _nx_to_cyjs_elements(g, clusters, positions=positions)
+    payload = {"SciKGraph": {"elements": elements, "layout": browser_layout}}
+    path = os.path.join(app.root_path, 'static', 'networks.js')
+    with open(path, 'w') as f:
+        f.write('var networks = ' + json.dumps(payload) + ';')
+    sKGraph.visualization_enabled = True
+
+
+def _write_disabled_networks_js():
+    payload = {"SciKGraph": {"disabled": True}}
+    path = os.path.join(app.root_path, 'static', 'networks.js')
+    with open(path, 'w') as f:
+        f.write('var networks = ' + json.dumps(payload) + ';')
+    sKGraph.visualization_enabled = False
+
+
+def _read_render_options(target_skg):
+    layout = request.form.get('layoutSelect') or getattr(target_skg, 'last_layout', None) or DEFAULT_LAYOUT
+    if layout not in LAYOUTS:
+        layout = DEFAULT_LAYOUT
+    target_skg.last_layout = layout
+    if 'renderVisualizationFormMarker' in request.form:
+        render = 'renderVisualizationCheck' in request.form
+    else:
+        render = True
+    return layout, render
+
 @app.route('/create', methods=['POST', 'GET'])
 def create():
 
     ### -----------------------------------    Construct Graph          -----------------------------------------###
     if request.method == 'POST':
+        layout_name, render_flag = _read_render_options(sKGraph)
 
-        if 'languageSelect' in request.form:
+        if 'updateVisualizationButton' in request.form:
+            if len(sKGraph.pre_processed_graph) > 0:
+                target = sKGraph.pre_processed_graph
+            elif not isinstance(sKGraph.sciKGraph, int):
+                target = sKGraph.sciKGraph
+            else:
+                target = None
+            if not render_flag:
+                _write_disabled_networks_js()
+            elif target is not None:
+                plot_network(target,
+                             clusters=sKGraph.crisp_clusters or None,
+                             layout_name=layout_name)
+            return render_template('createSciKGraph.html')
+
+        elif 'languageSelect' in request.form:
             documentsList = []
             documentsNamesList = []
             files = request.files.getlist("documentPathsInput")
@@ -53,9 +144,20 @@ def create():
             else:
                 mergeIfFail = False
 
+            # A fresh Construct invalidates any prior pre-processing/clustering.
+            import networkx as _nx
+            sKGraph.pre_processed_graph = _nx.DiGraph()
+            sKGraph.clusters = []
+            sKGraph.crisp_clusters = []
+            sKGraph.deleted_nodes = []
+            sKGraph.deleted_edges = []
+            sKGraph.deleted_isolated_nodes = []
             sKGraph.create_SciKGraph(documentsList, documentsNamesList, babelfy_key = babelfy_key, language = language, distance_window=int(distance), mergeIfFail = mergeIfFail)
-            plot = cyjs.network.create_from_networkx(sKGraph.sciKGraph)
-            plot_network()
+            if render_flag:
+                plot_network(sKGraph.sciKGraph, layout_name=layout_name)
+            else:
+                _write_disabled_networks_js()
+            flash("Graph constructed: " + str(len(sKGraph.sciKGraph)) + " concepts, " + str(len(sKGraph.sciKGraph.edges())) + " edges.", "success")
             sorted_concepts = sKGraph.rank(g=sKGraph.sciKGraph, dictionaryCodeMerged=sKGraph.dictionaryCodeMerged)
             return render_template('createSciKGraph.html', key_concepts = sorted_concepts[:200], documents=len(sKGraph.graphName), language=sKGraph.language, cooccurrence=sKGraph.distance_window + 1, total_concepts=len(sKGraph.sciKGraph), total_edges=len(sKGraph.sciKGraph.edges()))
 
@@ -64,19 +166,8 @@ def create():
             file = request.files['openSciKGraphInput']
             sKGraph.clear_variables()
             sKGraph.open_variables_pickle(file)
-            plot = cyjs.network.create_from_networkx(sKGraph.sciKGraph)
-
-            #plot_network()
-
-            #create groups
-            for c, count in zip(sKGraph.crisp_clusters, range(len(sKGraph.crisp_clusters))):
-                group = ''
-                for n in c:
-                    group += 'name:' + str(n) + ','
-                group = group[:-1]
-                cytoscape.group.create(nodeList=group, groupName='group'+str(count))
-
-            plot_network()
+            if render_flag:
+                plot_network(sKGraph.sciKGraph, clusters=sKGraph.crisp_clusters, layout_name=layout_name)
             sorted_concepts = sKGraph.rank(g=sKGraph.sciKGraph, dictionaryCodeMerged=sKGraph.dictionaryCodeMerged)
             return render_template('createSciKGraph.html', key_concepts = sorted_concepts[:200], documents=len(sKGraph.graphName), language=sKGraph.language, cooccurrence=sKGraph.distance_window + 1, total_concepts=len(sKGraph.sciKGraph), total_edges=len(sKGraph.sciKGraph.edges()))
 
@@ -98,8 +189,9 @@ def create():
 
             edgesThreshold = request.form.get('edgesThresholdInput')
             sKGraph.pre_process_graph(sKGraph.sciKGraph, int(edgesThreshold), 0, list_nodes = codesThresholdList)
-            plot = cyjs.network.create_from_networkx(sKGraph.pre_processed_graph)
-            plot_network()
+            if render_flag:
+                plot_network(sKGraph.pre_processed_graph, layout_name=layout_name)
+            flash("Pre-processing complete: " + str(len(sKGraph.pre_processed_graph)) + " concepts, " + str(len(sKGraph.pre_processed_graph.edges())) + " edges remain.", "success")
             sorted_concepts = sKGraph.rank(g=sKGraph.pre_processed_graph, dictionaryCodeMerged=sKGraph.dictionaryCodeMerged)
             return render_template('createSciKGraph.html', deleted_edges= len(sKGraph.deleted_edges), deleted_concepts= len(sKGraph.deleted_nodes), deleted_isolated_concepts= len(sKGraph.deleted_isolated_nodes), key_concepts = sorted_concepts[:200], documents=len(sKGraph.graphName), language=sKGraph.language, cooccurrence=sKGraph.distance_window + 1, total_concepts=len(sKGraph.pre_processed_graph), total_edges=len(sKGraph.pre_processed_graph.edges()))
 
@@ -107,21 +199,13 @@ def create():
         elif 'clusterGraphButton' in request.form:
             if len(sKGraph.pre_processed_graph) > 2:
                 sKGraph.cluster_graph(sKGraph.pre_processed_graph)
-
+                cluster_graph = sKGraph.pre_processed_graph
             else:
                 sKGraph.cluster_graph(sKGraph.sciKGraph)
-
-
-            #create groups
-            for c, count in zip(sKGraph.crisp_clusters, range(len(sKGraph.crisp_clusters))):
-                group = ''
-                for n in c:
-                    group += 'name:' + str(n) + ','
-                group = group[:-1]
-                print('group'+str(count), group)
-                cytoscape.group.create(nodeList=group, groupName='group'+str(count))
-
-            plot_network()
+                cluster_graph = sKGraph.sciKGraph
+            if render_flag:
+                plot_network(cluster_graph, clusters=sKGraph.crisp_clusters, layout_name=layout_name)
+            flash("Clustering complete: " + str(len(sKGraph.crisp_clusters)) + " clusters.", "success")
             sorted_concepts = sKGraph.rank(g=sKGraph.sciKGraph, dictionaryCodeMerged=sKGraph.dictionaryCodeMerged)
             return render_template('createSciKGraph.html', key_concepts = sorted_concepts[:200], documents=len(sKGraph.graphName), language=sKGraph.language, cooccurrence=sKGraph.distance_window + 1, total_concepts=len(sKGraph.sciKGraph), total_edges=len(sKGraph.sciKGraph.edges()))
 
@@ -140,27 +224,35 @@ def analyze():
     nClusterKeys = 0
 
     if request.method == 'POST':
+        layout_name, render_flag = _read_render_options(sKGraph)
+
+        if 'updateVisualizationButton' in request.form:
+            target = sKGraph.sciKGraph if not isinstance(sKGraph.sciKGraph, int) else None
+            if not render_flag:
+                _write_disabled_networks_js()
+            elif target is not None:
+                plot_network(target,
+                             clusters=sKGraph.crisp_clusters or None,
+                             layout_name=layout_name)
+            return render_template('analyze.html', nClusters = len(sKGraph.crisp_clusters), singleModularity = single_modularity, nclusterModularity = nClusterModularity, modularit = modularity, gKeys = graph_keys, gCentralities = graph_centrality, nKeys = len(graph_keys), nClustKeys = nClusterKeys, cKeys = cluster_keys, cCentralities = cluster_centrality, nCKeys = len(cluster_keys))
 
         #################### REDUCE CLUSTERS ################################
         if 'reduceClustersInput' in request.form:
             reduceClusters = request.form.get('reduceClustersInput')
             sKGraph.clusters  = Analyses.reduceClusters(sKGraph.sciKGraph, sKGraph.clusters, int(reduceClusters))
             sKGraph.crisp_clusters = sKGraph.to_crisp(sKGraph.clusters)
-
-            plot = cyjs.network.create_from_networkx(sKGraph.sciKGraph)
-            #create groups
-            for c, count in zip(sKGraph.crisp_clusters, range(len(sKGraph.crisp_clusters))):
-                group = ''
-                for n in c:
-                    group += 'name:' + str(n) + ','
-                group = group[:-1]
-                cytoscape.group.create(nodeList=group, groupName='group'+str(count))
-            plot_network()
+            if render_flag:
+                plot_network(sKGraph.sciKGraph, clusters=sKGraph.crisp_clusters, layout_name=layout_name)
+            flash("Cluster reduction complete: " + str(len(sKGraph.crisp_clusters)) + " clusters.", "success")
 
         ######################## RELATION GRAPH #############################
         elif 'clusterRelationButton' in request.form:
-            plot = cyjs.network.create_from_networkx(Analyses.clusterRelationGraph(sKGraph.sciKGraph, sKGraph.clusters))
-            plot_network()
+            relation_graph = Analyses.clusterRelationGraph(sKGraph.sciKGraph, sKGraph.clusters)
+            # clusterRelationGraph in __init__.py returns (graph, max_edge, min_edge); accept either form
+            if isinstance(relation_graph, tuple):
+                relation_graph = relation_graph[0]
+            if render_flag:
+                plot_network(relation_graph, layout_name='circle')
 
         ########################## MODULARITY ###############################
         elif 'graphModularityButton' in request.form:
@@ -235,6 +327,7 @@ def evolution():
     cluster_2 = '0'
 
     if request.method == 'POST':
+        layout_name, render_flag = _read_render_options(sKGraph1)
 
         if 'loadClusters' in request.form:
             file1 = request.files['graph1Input']
@@ -331,16 +424,12 @@ def evolution():
             #comparison of two clusters from different covers
             new_graph = Analyses.evolution(c1, c2, sKGraph1, sKGraph2)
 
-            plot = cyjs.network.create_from_networkx(new_graph)
-            #create groups
-            for i in range(1,4):
-                group = ''
-                for n in new_graph.nodes():
-                    if new_graph.nodes()[n]['clusters'] == i:
-                        group += 'name:' + str(n) + ','
-                group = group[:-1]
-                cytoscape.group.create(nodeList=group, groupName='group'+str(i))
-            plot_network()
+            evo_clusters = [
+                [n for n in new_graph.nodes() if new_graph.nodes()[n].get('clusters') == i]
+                for i in range(1, 4)
+            ]
+            if render_flag:
+                plot_network(new_graph, clusters=evo_clusters, layout_name=layout_name)
 
             return render_template('evolution.html', coversLoaded = coversLoadedLabel, coversSimilarity = covers_similarity, similarClusters = similar_clusters, minClusterThreshold=min_cluster_threshold, similarityThreshold = similarity_threshold, overelappingClusters = overlapping_clusters, cluster1 = cluster_1, cluster2 = cluster_2)
 
@@ -351,124 +440,6 @@ def evolution():
 @app.route('/')
 def index():
     return create()
-
-def plot_network():
-    saveFileName = os.path.join(app.root_path, 'static', 'sciKGraph.cx')
-    cytoscape.layout.cose()
-
-    #delete old network
-    for i in cyjs.network.get_all():
-        if i != cytoscape.network.get()['SUID']:
-            cytoscape.network.destroy(network='SUID:'+str(i))
-
-    subprocess.run(["rm", saveFileName])
-    cytoscape.network.export(OutputFile=saveFileName, options='cx')
-
-
-
-
-    with open(saveFileName) as json_file:
-        cx = json.load(json_file)
-
-    content = parse_cx_to_js(cx)
-
-    saveFileName = os.path.join(app.root_path, 'static', 'networks.js')
-    f = open(saveFileName,'w')
-    f.write('var networks = {"From cyREST": ')
-    f.write(content)
-    f.write('}')
-    f.close()
-
-    return
-
-
-def parse_cx_to_js(cx):
-    #create nodes
-    nodes = {}
-    for n in cx[2]['nodes']:
-        data = {}
-        position = {}
-        node = {}
-        data['id'] = str(n['@id'])
-        data['shared_name'] = n['n']
-        data['SUID'] = n['@id']
-        node['data'] = data
-        node['position'] = position
-        nodes[n['@id']] = node
-
-
-    #set nodes attributes
-    for l in cx[7]['nodeAttributes']:
-        atributos = [v for k, v in l.items() ]
-
-        if atributos[2] == 'NumChildren' or atributos[2] == 'NumDescendents':
-            atributos[3] = int(float(atributos[3]))
-        elif atributos[2] == 'selected':
-            atributos[3] = False
-        elif atributos[2] == 'peso':
-            atributos[3] = float(atributos[3])
-        elif atributos[2] == 'id':
-                atributos[2] = 'id_original'
-        nodes[atributos[1]]['data'][atributos[2]] = atributos[3]
-
-    #set nodes position
-    for l in cx[9]['cartesianLayout']:
-        position = [v for k, v in l.items() ]
-        nodes[position[0]]['position']['x'] = position[2]
-        nodes[position[0]]['position']['y'] = position[3]
-
-    #set edges
-    edges = {}
-    for l in cx[8]['edgeAttributes']:
-        atributos = [v for k, v in l.items() ]
-        if atributos[2] == 'source':
-            atributos[2] = 'source_original'
-        elif atributos[2] == 'target':
-            atributos[2] = 'target_original'
-        elif atributos[2] == 'selected':
-            atributos[3] = False
-        elif atributos[2] == 'weight':
-            atributos[3] = float(atributos[3])
-
-        if atributos[1] in edges:
-            edges[atributos[1]]['data'][atributos[2]] = atributos[3]
-        else:
-            data = {}
-            edge = {'data': data}
-            data[atributos[2]] = atributos[3]
-            edge['data'] = data
-            edges[atributos[1]] = edge
-
-
-    #set edges attributes
-    for l in cx[3]['edges']:
-        if l['@id'] in edges:
-            edges[l['@id']]['data']['id'] = str(l['@id'])
-            edges[l['@id']]['data']['source'] = str(l['s'])
-            edges[l['@id']]['data']['target'] = str(l['t'])
-            edges[l['@id']]['data']['SUID'] = l['@id']
-
-
-    ########organize json
-    elements = {}
-    #put nodes in a list
-    list_nodes = []
-    for n in nodes:
-        list_nodes.append(nodes[n])
-    elements['nodes'] = list_nodes
-    #put edgfes in a list
-    list_edges = []
-    for e in edges:
-        list_edges.append(edges[e])
-    elements['edges'] = list_edges
-
-    #create final json
-    network_id = cx[6]['cyHiddenAttributes'][-1]['s']
-    data = {'shared_name': 'From cyREST', 'name': 'From cyREST', 'SUID': network_id, '__Annotations': [], 'selected': False}
-    final = {'format_version': '1,0', 'generated_by': 'cytoscape', 'target_cytoscapejs_version': '~2.1', 'data': data, 'elements': elements}
-    #final = {'From cyREST': final}
-
-    return json.dumps(final)
 
 if __name__ == '__main__':
     app.run(debug=True)

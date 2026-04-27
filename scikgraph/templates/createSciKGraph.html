@@ -1,21 +1,33 @@
 {% extends "bootstrap/base.html" %}
 {% block title %}SciKGRaph | Create{% endblock %}
 
+{% macro render_panel() %}
+<form class="form-group" name="visualizationPanelForm" method="POST" enctype="multipart/form-data"
+      style="border:1px solid #ccc;padding:8px;border-radius:4px;background:#fafafa;margin-bottom:10px">
+  <label class="control-label" style="font-size:12px;margin-bottom:4px"><strong>Visualization</strong></label>
+  <select class="form-control input-sm" id="globalLayoutSelect" name="layoutSelect" style="margin-bottom:6px">
+    {% for opt in available_layouts %}
+    <option value="{{opt}}" {% if opt == last_layout %}selected{% endif %}>{{opt}}</option>
+    {% endfor %}
+  </select>
+  <label class="checkbox-inline" style="font-size:12px;margin-bottom:6px">
+    <input type="checkbox" id="globalRenderCheck" name="renderVisualizationCheck" {% if render_enabled %}checked{% endif %}> Render graph
+  </label>
+  <input type="hidden" name="renderVisualizationFormMarker" value="1">
+  <button type="submit" class="btn btn-success btn-sm btn-block" name="updateVisualizationButton">Update visualization setting</button>
+</form>
+{% endmacro %}
+
 {% block content %}
 {{ super() }}
 <div class="container">
   <nav class="navbar navbar-default">
   <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-
       <a class="navbar-brand" href="#">
-        <!--<img alt="SciKGraph" class="navbar-brand" src="{{url_for('.static', filename='logo.png')}}"> -->
         <img alt="SciKGraph" src="...">
       </a>
     </div>
-
-    <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <li class="active"><a href="{{ url_for('create') }}">Create<span class="sr-only">(current)</span></a></li>
@@ -24,12 +36,20 @@
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><a href="#">About</a></li>
-
       </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
+    </div>
+  </div>
 </nav>
 
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }} alert-dismissible" role="alert" style="margin-top:10px">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        {{ msg }}
+      </div>
+    {% endfor %}
+  {% endwith %}
 
   <div class="py-5 text-center">
   </div>
@@ -85,7 +105,14 @@
           </div>
         </div>
 
-        <button type="submit" name="constructGraphButton" class="btn btn-primary btn-block">Construct Graph</button>
+        <div class="form-group">
+          <label class="checkbox-inline" style="font-size:12px">
+            <input type="checkbox" name="renderVisualizationCheck" checked> Render after submit
+          </label>
+          <input type="hidden" name="renderVisualizationFormMarker" value="1">
+        </div>
+
+        <button type="submit" name="constructGraphButton" class="btn btn-primary btn-block" data-long-task="Constructing graph">Construct Graph</button>
 
       </form>
 
@@ -110,8 +137,6 @@
               <option>{{ concept }}</option>
             {% endfor %}
 
-
-
           </select>
         </div>
 
@@ -129,14 +154,14 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary" name="preprocessButton" >Preprocess</button>
+        <button type="submit" class="btn btn-primary" name="preprocessButton" data-long-task="Pre-processing graph">Preprocess</button>
       </form>
 
       <div class="form-group">
         &nbsp;
       </div>
       <form class="needs-validation" name="clusterForm" method="POST" enctype="multipart/form-data">
-        <button type="submit" class="btn btn-primary btn-block" name="clusterGraphButton" >Cluster Graph</button>
+        <button type="submit" class="btn btn-primary btn-block" name="clusterGraphButton" data-long-task="Clustering graph">Cluster Graph</button>
       </form>
       <div class="form-group">
         &nbsp;
@@ -163,6 +188,9 @@
         <span class="label label-default">Deleted Edges: {{ deleted_edges }}</span>
         <span class="label label-default">Deleted Isolated Concepts: {{ deleted_isolated_concepts }}</span>
       </div>
+
+      {{ render_panel() }}
+
       <form class="needs-validation" name="openGraphForm" method="POST" enctype="multipart/form-data">
         <div class="btn-group" role="group" aria-label="...">
             <label for="exampleFormControlFile">Choose SciKGraph file to open:</label>
@@ -195,12 +223,10 @@
 {{super()}}
 <script src="{{url_for('.static', filename='custom.js')}}"></script>
 <script src="{{url_for('.static', filename='myscripts.js')}}"></script>
+<script src="{{url_for('.static', filename='vendor.js')}}"></script>
 <script src="{{url_for('.static', filename='networks.js')}}"></script>
 <script src="{{url_for('.static', filename='styles.js')}}"></script>
 <script src="{{url_for('.static', filename='main.js')}}"></script>
-<script src="{{url_for('.static', filename='vendor.js')}}"></script>
-<script src="{{url_for('.static', filename='1d327552.scripts.js')}}"></script>
-<script src="{{url_for('.static', filename='3e4be17b.app.js')}}"></script>
-<script src="{{url_for('.static', filename='65d77273.vendor.js')}}"></script>
+<script src="{{url_for('.static', filename='render-panel.js')}}"></script>
 
 {% endblock %}

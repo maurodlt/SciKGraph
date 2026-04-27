@@ -1,20 +1,7 @@
-import string
 import networkx as nx
-import re
-from nltk import word_tokenize, pos_tag
 from scikgraph.babelfy import *
-from nltk.stem import PorterStemmer
-from math import log
 import pickle
-import glob
-import os
-import nltk
 import operator
-import sys
-import matplotlib.pyplot as plt
-#from wordcloud import WordCloud
-#from matplotlib_venn import venn3
-import copy
 
 class OClustR():
 

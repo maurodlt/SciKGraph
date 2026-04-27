@@ -1,6 +1,23 @@
 {% extends "bootstrap/base.html" %}
 {% block title %}SciKGRaph | Analyze{% endblock %}
 
+{% macro render_panel() %}
+<form class="form-group" name="visualizationPanelForm" method="POST" enctype="multipart/form-data"
+      style="border:1px solid #ccc;padding:8px;border-radius:4px;background:#fafafa;margin-bottom:10px">
+  <label class="control-label" style="font-size:12px;margin-bottom:4px"><strong>Visualization</strong></label>
+  <select class="form-control input-sm" id="globalLayoutSelect" name="layoutSelect" style="margin-bottom:6px">
+    {% for opt in available_layouts %}
+    <option value="{{opt}}" {% if opt == last_layout %}selected{% endif %}>{{opt}}</option>
+    {% endfor %}
+  </select>
+  <label class="checkbox-inline" style="font-size:12px;margin-bottom:6px">
+    <input type="checkbox" id="globalRenderCheck" name="renderVisualizationCheck" {% if render_enabled %}checked{% endif %}> Render graph
+  </label>
+  <input type="hidden" name="renderVisualizationFormMarker" value="1">
+  <button type="submit" class="btn btn-success btn-sm btn-block" name="updateVisualizationButton">Update visualization setting</button>
+</form>
+{% endmacro %}
+
 {% block content %}
 {{ super() }}
 
@@ -32,6 +49,15 @@
     </div><!-- /.container-fluid -->
   </nav>
 
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }} alert-dismissible" role="alert" style="margin-top:10px">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        {{ msg }}
+      </div>
+    {% endfor %}
+  {% endwith %}
+
   <div class="row">
 
 
@@ -45,7 +71,7 @@
             <span class="input-group-addon" id="sizing-addon1"># Clusters:</span>
             <input type="number" name="reduceClustersInput" class="form-control" min="1" max= {{ nClusters }} value= {{ nClusters }} required>
             <div class="input-group-btn">
-              <button class="btn btn-primary" type="submit">Reduce</button>
+              <button class="btn btn-primary" type="submit" data-long-task="Reducing clusters">Reduce</button>
             </div>
           </div>
         </div>
@@ -193,6 +219,7 @@
         <span class="label label-default">Deleted Edges: {{ deleted_edges }}</span>
         <span class="label label-default">Deleted Isolated Concepts: {{ deleted_isolated_concepts }}</span>
       </div>
+      {{ render_panel() }}
       <form class="needs-validation" name="openGraphForm" method="POST" enctype="multipart/form-data">
         <div class="btn-group" role="group" aria-label="...">
             <label for="exampleFormControlFile">Choose SciKGraph file to open:</label>
@@ -226,12 +253,10 @@
 {{super()}}
 <script src="{{url_for('.static', filename='custom.js')}}"></script>
 <script src="{{url_for('.static', filename='myscripts.js')}}"></script>
+<script src="{{url_for('.static', filename='vendor.js')}}"></script>
 <script src="{{url_for('.static', filename='networks.js')}}"></script>
 <script src="{{url_for('.static', filename='styles.js')}}"></script>
 <script src="{{url_for('.static', filename='main.js')}}"></script>
-<script src="{{url_for('.static', filename='vendor.js')}}"></script>
-<script src="{{url_for('.static', filename='1d327552.scripts.js')}}"></script>
-<script src="{{url_for('.static', filename='3e4be17b.app.js')}}"></script>
-<script src="{{url_for('.static', filename='65d77273.vendor.js')}}"></script>
+<script src="{{url_for('.static', filename='render-panel.js')}}"></script>
 
 {% endblock %}

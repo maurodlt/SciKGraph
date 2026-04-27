@@ -4,6 +4,30 @@ import nltk
 import subprocess
 import sys
 
+
+def _ensure_nltk_resources():
+    """Download nltk data the first time this module is imported.
+
+    Called at import time so the app fails loudly during startup on a fresh
+    machine instead of mid-request when a user clicks "Keyphrases". Subsequent
+    imports are a no-op because `nltk.data.find` succeeds.
+    """
+    needed = [
+        ("tokenizers/punkt_tab", "punkt_tab"),
+        ("tokenizers/punkt", "punkt"),
+        ("taggers/averaged_perceptron_tagger_eng", "averaged_perceptron_tagger_eng"),
+        ("taggers/averaged_perceptron_tagger", "averaged_perceptron_tagger"),
+    ]
+    for path, pkg in needed:
+        try:
+            nltk.data.find(path)
+        except LookupError:
+            nltk.download(pkg, quiet=True)
+
+
+_ensure_nltk_resources()
+
+
 def single_cluster_modularityOV(graph, Clusters, f, nCluster):#, resultPosition):
     E_in = 0
     E_out = 0
@@ -244,19 +268,24 @@ def parseAnswer(answer):
 def compareFullCovers(cover1, cover2, folderNMI, NMI_type='NMI<Max>'):
     command = folderNMI + ' ' + cover1 + ' ' + cover2
     p = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    answer = p.stdout.decode('ascii').split('\n')
+    answer = p.stdout.decode('ascii', errors='replace').split('\n')
     parsedAnswer = parseAnswer(answer)
 
-
-    if NMI_type == 'NMI<Max>':
-        return parsedAnswer[0][1]
-    elif NMI_type == 'lfkNMI':
-        return parsedAnswer[1][1]
-    elif NMI_type == 'NMI<Sum>':
-        return parsedAnswer[2][1]
-    else:
+    index = {'NMI<Max>': 0, 'lfkNMI': 1, 'NMI<Sum>': 2}.get(NMI_type)
+    if index is None:
         print('Wrong NMI_type!\n')
         return parsedAnswer
+
+    if len(parsedAnswer) <= index or len(parsedAnswer[index]) < 2:
+        # Binary failed or produced unexpected output. Surface a useful hint
+        # instead of crashing with IndexError.
+        raw = p.stdout.decode('ascii', errors='replace').strip()
+        raise RuntimeError(
+            "oNMI did not return a valid result. "
+            "Check that '" + folderNMI + "' is executable and that both "
+            "cluster files exist. Output: " + (raw[:300] if raw else '<empty>')
+        )
+    return parsedAnswer[index][1]
 
 
 def calcDegreeCentrality(g):

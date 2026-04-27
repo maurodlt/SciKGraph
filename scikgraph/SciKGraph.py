@@ -2,16 +2,13 @@ import string
 import networkx as nx
 import re
 import sys
-from nltk import word_tokenize, pos_tag
 from scikgraph.babelfy import *
-from nltk.stem import PorterStemmer
 from math import log
 import pickle
 import glob
 import os
 import scikgraph.OClustR as OCR
 import operator
-#import nltk
 
 class SciKGraph():
 
@@ -34,6 +31,8 @@ class SciKGraph():
         self.deleted_edges = []
         self.deleted_isolated_nodes = []
         self.name=""
+        self.last_layout = "spring"
+        self.visualization_enabled = True
 
         self.clusters = []
         self.crisp_clusters = []
@@ -463,6 +462,8 @@ class SciKGraph():
         self.deleted_edges = []
         self.deleted_isolated_nodes = []
         self.name=""
+        self.last_layout = "spring"
+        self.visualization_enabled = True
 
         self.clusters = []
         self.crisp_clusters = []

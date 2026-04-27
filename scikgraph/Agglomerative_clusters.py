@@ -1,4 +1,3 @@
-import networkx as nx
 import copy
 
 def single_cluster_modularityOV(graph, Clusters, f, nCluster):#, resultPosition):

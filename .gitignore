@@ -1,0 +1,29 @@
+# Build artifacts
+/build/
+/dist/
+*.egg-info/
+*.egg
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtualenvs
+scikgraph_env/
+.venv/
+venv/
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+
+# Session / runtime data — keep the saveFiles dir tracked (via .gitkeep)
+# but ignore anything users write into it at runtime.
+scikgraph/saveFiles/*
+!scikgraph/saveFiles/.gitkeep
+
+# Per-render generated JS — regenerated on every plot_network() call.
+scikgraph/static/networks.js
+scikgraph/static/styles.js
