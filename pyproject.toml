@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scikgraph"
-version = "2.0.0"
+version = "2.0.1"
 description = "Web application for building, clustering, and visualizing knowledge graphs from scientific text."
 readme = "README.md"
 requires-python = ">=3.10"

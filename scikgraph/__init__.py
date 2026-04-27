@@ -38,6 +38,9 @@ def create_app():
     app.config['SECRET_KEY'] = os.urandom(24)
     UPLOAD_FOLDER = '/home/mauro/Documents/flask_app/static/temp/'
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    # Ensure runtime data dir exists. The wheel doesn't ship this directory,
+    # so on a pip-installed copy it must be created on first launch.
+    os.makedirs(os.path.join(app.root_path, 'saveFiles'), exist_ok=True)
     Bootstrap(app)
     sKGraph = skg.SciKGraph()
     sKGraph1 = skg.SciKGraph()
